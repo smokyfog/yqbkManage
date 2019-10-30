@@ -140,7 +140,7 @@
             <el-button
               size="small"
               type="primary"
-              @click="show_detai(scope.row.content)"
+              @click="show_detai(scope.row._id)"
             >查看</el-button>
             <el-button
               size="small"
@@ -263,9 +263,18 @@ export default {
       this.selectedData = rows
     },
     // 查看详情
-    show_detai(txt) {
-      this.dialogTableVisible = true
-      this.article_content = txt
+    async show_detai(id) {
+      try {
+        const res = await Api.get_article_detail({ id })
+        if (res.code === 0 && res.data.content) {
+          this.dialogTableVisible = true
+          this.article_content = res.data.content
+        } else {
+          this.$message({ type: 'error', showClose: true, message: res.data.msg })
+        }
+      } catch (err) {
+        this.$message({ type: 'error', showClose: true, message: '请求失败！' })
+      }
     },
     // 删除视频
     deleteVideo(id) {

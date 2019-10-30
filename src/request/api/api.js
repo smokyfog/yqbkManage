@@ -52,11 +52,19 @@ export default Api = {
       params: params
     })
   },
-  // 创建电影
+  // 删除指定文章
   delete_article(params) {
     return request({
       method: 'Post',
       url: '/admin/article/delete_article',
+      params: params
+    })
+  },
+  // 删除指定文章
+  get_article_detail(params) {
+    return request({
+      method: 'GET',
+      url: '/admin/article/get_detail',
       params: params
     })
   }
