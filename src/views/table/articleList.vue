@@ -45,6 +45,26 @@
                   </el-col>
                 </el-row>
               </el-col>
+              <el-col :span="6">
+                <el-row>
+                  <el-col :span="7"><div class="search_title">类型</div></el-col>
+                  <el-col :span="17">
+                    <el-select
+                      v-model="search.type"
+                      placeholder="请选择"
+                      @change="search_ref"
+                    >
+                      <el-option
+                        v-for="item in typeOption"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                        size="medium"
+                      />
+                    </el-select>
+                  </el-col>
+                </el-row>
+              </el-col>
             </el-row>
           </el-collapse-item>
         </el-collapse>
@@ -82,6 +102,11 @@
               class="msg_show"
             >{{ scope.row.title || '未知' }}</div>
           </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column label="类型" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.type | wavType }}
         </template>
       </el-table-column>
       <el-table-column label="喜欢数" align="center">
@@ -141,6 +166,7 @@
     <el-dialog
       :visible.sync="dialogTableVisible"
       width="1150px"
+      top="30px"
     >
       <div
         class="video_box"
@@ -151,8 +177,6 @@
 </template>
 
 <script>
-// import { getList } from '@/api/table'
-import axios from 'axios'
 import Api from '@/request/api/api'
 import Pagination from '@/components/Pagination'
 import _ from 'lodash'
@@ -163,9 +187,8 @@ export default {
     wavType(val) {
       var num = parseInt(val)
       switch (num) {
-        case 0: return '专业'
-        case 1: return '用户'
-        case 2: return '上传未知'
+        case 1: return '笔记'
+        case 10: return '分享'
         default: return '未知'
       }
     }
@@ -176,17 +199,31 @@ export default {
       listLoading: true,
       total: 0,
       activeNames: [],
+      typeOption: [
+        {
+          value: '',
+          label: '全部'
+        },
+        {
+          value: 1,
+          label: '日记'
+        }, {
+          value: 10,
+          label: '分享'
+        }
+      ],
       listQuery: {
         page: 1,
         page_size: 20,
         importance: undefined,
         title: undefined,
-        type: undefined,
+        type: 1,
         sort: undefined
       },
       search: {
         id: undefined,
-        search_title: ''
+        search_title: '',
+        type: undefined
       },
       videoSrc: null,
       selectedData: [],
@@ -232,19 +269,19 @@ export default {
     },
     // 删除视频
     deleteVideo(id) {
-      console.log(id)
       this.$confirm('是否删除该作品?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        Api.delete_article({id})
+        Api.delete_article({ id })
           .then(response => {
             if (response.code === 0) {
               this.$message({
                 type: 'success',
                 message: '删除成功!'
               })
+              this.search_ref()
             } else {
               this.$notify.error({ title: '错误', message: response.message })
             }
