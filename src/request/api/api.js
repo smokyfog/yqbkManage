@@ -67,5 +67,13 @@ export default Api = {
       url: '/admin/article/get_detail',
       params: params
     })
+  },
+  // 上传文章
+  release_article(params) {
+    return request({
+      method: 'Post',
+      url: '/admin/article/release_article',
+      params: params
+    })
   }
 }
