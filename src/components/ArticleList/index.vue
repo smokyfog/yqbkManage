@@ -7,17 +7,8 @@
         type="primary"
         size="small"
         icon="el-icon-plus"
-        @click="goPutArticle"
-      > 发布文章
-      </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px;"
-        type="danger"
-        size="small"
-        icon="el-icon-delete"
-        @click="batchDelete"
-      > 批量删除
+        @click="addArticles"
+      > 添加
       </el-button>
     </div>
     <el-row>
@@ -114,6 +105,15 @@
           </el-popover>
         </template>
       </el-table-column>
+      <el-table-column label="banner" align="center">
+        <template slot-scope="scope">
+          <el-image
+            style="width: 100px; height: 80px"
+            :src="scope.row.imageUrl"
+            :preview-src-list="[ scope.row.imageUrl ]"
+          />
+        </template>
+      </el-table-column>
       <el-table-column label="类型" align="center">
         <template slot-scope="scope">
           {{ scope.row.type | wavType }}
@@ -146,24 +146,14 @@
           <span>{{ scope.row.update_time | formatTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="190px">
+      <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button-group>
             <el-button
               size="small"
               type="primary"
-              @click="show_detai(scope.row._id)"
-            >查看</el-button>
-            <el-button
-              size="small"
-              type="success"
-              @click="updateArticle(scope.row._id)"
-            >编辑</el-button>
-            <el-button
-              size="small"
-              type="danger"
-              @click="deleteArticle(scope.row._id)"
-            >删除</el-button>
+              @click="addArticle(scope.row._id)"
+            >添加</el-button>
           </el-button-group>
         </template>
       </el-table-column>
@@ -175,7 +165,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="fetchData"
     />
-    <el-dialog
+    <!-- <el-dialog
       :visible.sync="dialogTableVisible"
       width="1150px"
       top="30px"
@@ -184,7 +174,7 @@
         class="video_box"
         v-html="article_content"
       />
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
@@ -277,76 +267,25 @@ export default {
     handleSelectionChange(rows) {
       this.selectedData = rows
     },
-    // 查看详情
-    async show_detai(id) {
-      try {
-        const res = await Api.get_article_detail({ id })
-        if (res.code === 0 && res.data.content) {
-          this.dialogTableVisible = true
-          this.article_content = res.data.content
-        } else {
-          this.$message({ type: 'error', showClose: true, message: res.data.msg })
-        }
-      } catch (err) {
-        this.$message({ type: 'error', showClose: true, message: '请求失败！' })
-      }
+    // 添加文章
+    addArticle(idx) {
+      this.$emit('addarticlebyid', idx)
     },
-    // 删除视频
-    deleteArticle(ids) {
-      this.$confirm('是否删除该作品?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        Api.delete_article({ ids })
-          .then(response => {
-            if (response.code === 0) {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              })
-              this.search_ref()
-            } else {
-              this.$notify.error({ title: '错误', message: response.msg })
-            }
-          })
-          .catch(() => {
-            this.$message({ type: 'error', showClose: true, message: '请求失败！' })
-          })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
-      })
-    },
-    // 编辑视频
-    updateArticle(id) {
-      this.$router.push({
-        path: '/article/put-article',
-        query: {
-          id
-        }
-      })
-    },
-    // 跳转发布页
-    goPutArticle() {
-      this.$router.push('/article/put-article')
-    },
-    //  批量删除
-    batchDelete() {
-      if (!this.selectedData.length) {
+    // 批量添加
+    addArticles(idx) {
+      const arr = this.selectedData
+      if (!arr.length) {
         return this.$message({
-          message: '请至少选一个文章',
+          message: '至少选择一个哦',
           type: 'warning'
         })
       }
-      let ids = []
-      this.selectedData.map(item => {
-        ids.push(item._id)
+      const idsArr = []
+      arr.map(item => {
+        idsArr.push(item._id)
       })
-      ids = ids.join(',')
-      this.deleteArticle(ids)
+      const ids = idsArr.join(',')
+      this.addArticle(ids)
     }
   }
 }

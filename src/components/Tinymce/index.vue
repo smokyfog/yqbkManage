@@ -55,6 +55,11 @@ export default {
       type: [Number, String],
       required: false,
       default: 'auto'
+    },
+    isinit: {
+      type: Boolean,
+      required: false,
+      default: true
     }
   },
   data() {
@@ -89,7 +94,9 @@ export default {
     }
   },
   mounted() {
-    this.init()
+    if (this.isinit) {
+      this.init()
+    }
   },
   activated() {
     if (window.tinymce) {

@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container movielist">
+  <div class="app-container recommend_config">
     <div class="filter-container">
       <el-button
         class="filter-item"
@@ -7,79 +7,19 @@
         type="primary"
         size="small"
         icon="el-icon-plus"
-        @click="goPutArticle"
-      > 发布文章
+        @click="addArticle"
+      > 添加文章
       </el-button>
-      <el-button
+      <!-- <el-button
         class="filter-item"
         style="margin-left: 10px;"
         type="danger"
         size="small"
         icon="el-icon-delete"
-        @click="batchDelete"
-      > 批量删除
-      </el-button>
+        @click="deleteArticle"
+      > 批量移除
+      </el-button> -->
     </div>
-    <el-row>
-      <el-col :span="24" class="">
-        <el-collapse v-model="activeNames">
-          <el-collapse-item title=" 筛选" name="1">
-            <el-row :gutter="20" class="search_box">
-              <el-col :span="6">
-                <el-row>
-                  <el-col :span="7"><div class="search_title">ID</div></el-col>
-                  <el-col :span="17">
-                    <el-input
-                      v-model="search.id"
-                      :span="18"
-                      size="medium"
-                      placeholder="请输入内容"
-                      clearable
-                      @input="search_ref"
-                    />
-                  </el-col>
-                </el-row>
-              </el-col>
-              <el-col :span="6">
-                <el-row>
-                  <el-col :span="7"><div class="search_title">标题</div></el-col>
-                  <el-col :span="17">
-                    <el-input
-                      v-model="search.search_title"
-                      :span="18"
-                      size="medium"
-                      placeholder="请输入内容"
-                      clearable
-                      @input="search_ref"
-                    />
-                  </el-col>
-                </el-row>
-              </el-col>
-              <el-col :span="6">
-                <el-row>
-                  <el-col :span="7"><div class="search_title">类型</div></el-col>
-                  <el-col :span="17">
-                    <el-select
-                      v-model="search.type"
-                      placeholder="请选择"
-                      @change="search_ref"
-                    >
-                      <el-option
-                        v-for="item in typeOption"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                        size="medium"
-                      />
-                    </el-select>
-                  </el-col>
-                </el-row>
-              </el-col>
-            </el-row>
-          </el-collapse-item>
-        </el-collapse>
-      </el-col>
-    </el-row>
     <el-table
       v-loading="listLoading"
       :data="list"
@@ -119,19 +59,33 @@
           {{ scope.row.type | wavType }}
         </template>
       </el-table-column>
+      <el-table-column label="banner" align="center">
+        <template slot-scope="scope">
+          <el-image
+            style="width: 100px; height: 80px"
+            :src="scope.row.imageUrl"
+            :preview-src-list="[ scope.row.imageUrl ]"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="权重" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.weight }}
+        </template>
+      </el-table-column>
       <el-table-column label="喜欢数" align="center">
         <template slot-scope="scope">
-          {{ scope.row.likeCount || '未知' }}
+          {{ scope.row.likeCount }}
         </template>
       </el-table-column>
       <el-table-column label="不喜欢数" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.dislikeCount || '未知' }}</span>
+          <span>{{ scope.row.dislikeCount }}</span>
         </template>
       </el-table-column>
       <el-table-column label="浏览数" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.browseCount || '未知' }}</span>
+          <span>{{ scope.row.browseCount }}</span>
         </template>
       </el-table-column>
       <el-table-column label="创建时间" align="center">
@@ -152,17 +106,17 @@
             <el-button
               size="small"
               type="primary"
-              @click="show_detai(scope.row._id)"
+              @click="show_detai(scope.row.articleId)"
             >查看</el-button>
             <el-button
               size="small"
-              type="success"
-              @click="updateArticle(scope.row._id)"
-            >编辑</el-button>
+              type="warning"
+              @click="update_weight(scope.row._id)"
+            >权重</el-button>
             <el-button
               size="small"
               type="danger"
-              @click="deleteArticle(scope.row._id)"
+              @click="delete_recommend(scope.row._id)"
             >删除</el-button>
           </el-button-group>
         </template>
@@ -176,7 +130,7 @@
       @pagination="fetchData"
     />
     <el-dialog
-      :visible.sync="dialogTableVisible"
+      :visible.sync="dialogTableVisible1"
       width="1150px"
       top="30px"
     >
@@ -185,16 +139,29 @@
         v-html="article_content"
       />
     </el-dialog>
+
+    <el-dialog
+      :visible.sync="dialogTableVisible2"
+      width="1150px"
+      top="30px"
+    >
+      <ArticleList @addarticlebyid="addArticleById" />
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import Api from '@/request/api/api'
+import artApi from '@/request/api/api'
+import Api from '@/request/api/recommend'
 import Pagination from '@/components/Pagination'
+import ArticleList from '@/components/ArticleList'
 import _ from 'lodash'
 
 export default {
-  components: { Pagination },
+  components: {
+    Pagination,
+    ArticleList
+  },
   filters: {
     wavType(val) {
       var num = parseInt(val)
@@ -242,7 +209,8 @@ export default {
       },
       videoSrc: null,
       selectedData: [],
-      dialogTableVisible: false,
+      dialogTableVisible1: false,
+      dialogTableVisible2: false,
       curr_lrc: '',
       msg_show: '测试',
       article_content: ''
@@ -255,7 +223,7 @@ export default {
     // 获取列表
     fetchData() {
       this.listLoading = true
-      Api.getArticleList({ ...this.listQuery, ...this.search })
+      Api.get_recommend({ ...this.listQuery })
         .then(response => {
           if (response.code === 0) {
             this.total = response.total
@@ -280,9 +248,9 @@ export default {
     // 查看详情
     async show_detai(id) {
       try {
-        const res = await Api.get_article_detail({ id })
+        const res = await artApi.get_article_detail({ id })
         if (res.code === 0 && res.data.content) {
-          this.dialogTableVisible = true
+          this.dialogTableVisible1 = true
           this.article_content = res.data.content
         } else {
           this.$message({ type: 'error', showClose: true, message: res.data.msg })
@@ -291,69 +259,88 @@ export default {
         this.$message({ type: 'error', showClose: true, message: '请求失败！' })
       }
     },
-    // 删除视频
+    // 添加
+    addArticle() {
+      this.dialogTableVisible2 = true
+    },
+    // 添加文章
+    async addArticleById(ids) {
+      const res = await Api.add_article_by_id({ ids })
+        .catch(err => {
+          this.$message.error('请求错误' + err)
+        })
+      if (res && res.code === 0) {
+        this.search_ref()
+        this.$message({
+          message: '成功',
+          type: 'success'
+        })
+      } else {
+        this.$message.error(res.msg)
+      }
+    },
+    // 删除文章
     deleteArticle(ids) {
-      this.$confirm('是否删除该作品?', '提示', {
+      console.log(ids)
+    },
+    // 删除
+    async delete_recommend(ids) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        Api.delete_article({ ids })
-          .then(response => {
-            if (response.code === 0) {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              })
-              this.search_ref()
-            } else {
-              this.$notify.error({ title: '错误', message: response.msg })
-            }
+      }).then(async() => {
+        const res = await Api.delete_recommend({ ids })
+          .catch(err => {
+            this.$message({
+              type: 'info',
+              message: '请求失败', err
+            })
           })
-          .catch(() => {
-            this.$message({ type: 'error', showClose: true, message: '请求失败！' })
+        if (res && res.code === 0) {
+          this.search_ref()
+          this.$message({
+            type: 'success',
+            message: res.msg
           })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
-      })
-    },
-    // 编辑视频
-    updateArticle(id) {
-      this.$router.push({
-        path: '/article/put-article',
-        query: {
-          id
+        } else {
+          this.$message({
+            type: 'info',
+            message: res.msg
+          })
         }
       })
     },
-    // 跳转发布页
-    goPutArticle() {
-      this.$router.push('/article/put-article')
-    },
-    //  批量删除
-    batchDelete() {
-      if (!this.selectedData.length) {
-        return this.$message({
-          message: '请至少选一个文章',
-          type: 'warning'
-        })
-      }
-      let ids = []
-      this.selectedData.map(item => {
-        ids.push(item._id)
+    // 配置权重
+    async update_weight(_id) {
+      this.$prompt('请输入权重', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /^-?[1-9]\d*$/,
+        inputErrorMessage: '格式不正确'
+      }).then(async({ value }) => {
+        const weight = parseInt(value)
+        const res = await Api.update_weight({ _id, weight })
+          .catch(err => {
+            this.$message.error('请求失败', err)
+          })
+        if (res && res.code === 0) {
+          this.search_ref()
+          this.$message({
+            type: 'success',
+            message: res.msg
+          })
+        } else {
+          this.$message.error(res.msg)
+        }
       })
-      ids = ids.join(',')
-      this.deleteArticle(ids)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .movielist{
+  .recommend_config{
     .filter-container {
       padding-bottom: 10px !important;
     }

@@ -67,27 +67,6 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/put',
-    component: Layout,
-    redirect: '/put/setmovie',
-    name: 'Put',
-    meta: { title: '上传', icon: 'example' },
-    children: [
-      {
-        path: 'setmovie',
-        name: 'SetMovie',
-        component: () => import('@/views/form/setMovie'),
-        meta: { title: '添加影片', icon: 'form' }
-      },
-      {
-        path: 'putsmallvideo',
-        name: 'PutSmallVideo',
-        component: () => import('@/views/form/putsmallvideo'),
-        meta: { title: '添加小视频', icon: 'form' }
-      }
-    ]
-  },
-  {
     path: '/article',
     component: Layout,
     redirect: '/article/put',
@@ -103,35 +82,32 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/example',
+    path: '/banner',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
+    redirect: '/banner/configuration',
+    name: 'BannerConfig',
+    meta: { title: 'banner', icon: 'example' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        path: 'banner-config',
+        name: 'bannerConfig',
+        component: () => import('@/views/table/bannerConfig'),
+        meta: { title: 'banner文章配置', icon: 'form' }
       }
     ]
   },
   {
-    path: '/form',
+    path: '/recommend',
     component: Layout,
+    redirect: '/recommend/recommend-config',
+    name: 'recommendConfig',
+    meta: { title: 'hot', icon: 'example' },
     children: [
       {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
+        path: 'recommend-config',
+        name: 'recommendConfig',
+        component: () => import('@/views/table/recommendConfig'),
+        meta: { title: '热门文章配置', icon: 'form' }
       }
     ]
   },
@@ -141,7 +117,7 @@ export const constantRoutes = [
     children: [
       {
         path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        meta: { title: '闫强的个人博客', icon: 'link' }
       }
     ]
   },
