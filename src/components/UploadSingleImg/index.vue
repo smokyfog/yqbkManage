@@ -33,14 +33,14 @@ export default {
     handleAvatarSuccess(res, file) {
       if (res.code === 0) {
         const imageUrl = res.url
-        // this.image_url = imageUrl
-        this.$emit('change_img', imageUrl)
+        const imagePath = res.path
+        this.$emit('change_img', imageUrl, imagePath)
         this.$message({
           type: 'success',
           message: res.msg
         })
       } else {
-        this.$$message.error(res.msg)
+        this.$message.error(res.msg)
       }
     },
     handleAvatarError(res, file) {

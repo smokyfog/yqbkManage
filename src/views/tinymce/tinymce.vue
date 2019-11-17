@@ -73,6 +73,7 @@ export default {
       },
       dialogTableVisible: false,
       imageUrl: '',
+      imagePath: '',
       content: '',
       isInit: !this.$route.query.id
     }
@@ -90,6 +91,7 @@ export default {
           disabled: data.disabled || 0
         }
         this.imageUrl = data.imageUrl || ''
+        this.imagePath = data.path || ''
         this.content = data.content || ''
       }
       this.$refs.tinymce.init()
@@ -117,7 +119,7 @@ export default {
         {
           content: this.content,
           ...this.form,
-          imageUrl: this.imageUrl,
+          imageUrl: this.imagePath,
           _id
         }
       )
@@ -130,8 +132,9 @@ export default {
         this.$message.error(res.msg)
       }
     },
-    change_img(url) {
+    change_img(url, path) {
       this.imageUrl = url
+      this.imagePath = path
     }
   }
 }
