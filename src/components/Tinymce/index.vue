@@ -218,6 +218,7 @@ export default {
 </script>
 
 <style scoped>
+@import '../../../public/content.scss';
 .tinymce-container {
   position: relative;
   line-height: normal;

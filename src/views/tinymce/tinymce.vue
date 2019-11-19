@@ -91,7 +91,7 @@ export default {
           disabled: data.disabled || 0
         }
         this.imageUrl = data.imageUrl || ''
-        this.imagePath = data.path || ''
+        this.imagePath = res.path || ''
         this.content = data.content || ''
       }
       this.$refs.tinymce.init()
@@ -133,6 +133,7 @@ export default {
       }
     },
     change_img(url, path) {
+      console.log(url, path)
       this.imageUrl = url
       this.imagePath = path
     }
@@ -141,6 +142,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// @import '../../../public/content.scss';
 .put_article {
   .oper_box {
     display: flex;
