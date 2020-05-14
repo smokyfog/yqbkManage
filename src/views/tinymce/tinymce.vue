@@ -1,7 +1,7 @@
 <template>
   <div class="put_article components-container">
     <div>
-      <tinymce ref="tinymce" v-model="content" :isinit="isInit" :height="800" />
+      <tinymce ref="tinymce" v-model="content" :isinit="isInit" :height="'calc(100vh - 105px)'" />
     </div>
     <div class="oper_box">
       <el-button
